@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>IFE</title>
+    <link rel="stylesheet" th:href="@{/css/video.css}">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+
+<h2>In Flight Entertainment Service</h2>
+
+<div id="videoGrid">
+    <th:block th:each="vid : ${videos}">
+        <div class="videoCard" th:attr="data-video=${vid.name}">
+            <img th:src="${vid.thumbnail}" th:alt="${vid.name}"/>
+            <div th:text="${vid.name}"></div>
+        </div>
+    </th:block>
+</div>
+
+<div id="videoContainer">
+    <video id="player" controls></video>
+</div>
+
+<script>
+    const cards = document.querySelectorAll(".videoCard");
+    const video = document.getElementById("player");
+    const videoContainer = document.getElementById("videoContainer");
+
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const vidName = card.getAttribute("data-video");
+            const hlsUrl = `/videos/${vidName}/index.m3u8`;
+
+            videoContainer.style.display = "block"; // show player container
+
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = hlsUrl;
+            } else if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(hlsUrl);
+                hls.attachMedia(video);
+            } else {
+                alert("HLS playback not supported in this browser.");
+            }
+
+            video.play();
+        });
+    });
+</script>
+
+</body>
+</html>
